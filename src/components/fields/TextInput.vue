@@ -9,7 +9,14 @@
 			<br v-if="limitLabel">
 			{{ limitLabel ?? '' }}
 		</label>
+		<NcRichText
+			v-if="isOutput && hasValue"
+			class="rendered-output"
+			:text="value ?? ''"
+			:use-markdown="true"
+			:autolink="true" />
 		<NcRichContenteditable
+			v-else
 			:id="id"
 			ref="input"
 			:model-value="value ?? ''"
@@ -52,6 +59,7 @@ import ContentCopyIcon from 'vue-material-design-icons/ContentCopy.vue'
 
 import NcButton from '@nextcloud/vue/components/NcButton'
 import NcRichContenteditable from '@nextcloud/vue/components/NcRichContenteditable'
+import { NcRichText } from '@nextcloud/vue/components/NcRichText'
 
 import isMobile from '../../mixins/isMobile.js'
 
@@ -77,6 +85,7 @@ export default {
 
 	components: {
 		NcRichContenteditable,
+		NcRichText,
 		NcButton,
 		FileDocumentOutlineIcon,
 		ClipboardCheckOutlineIcon,
