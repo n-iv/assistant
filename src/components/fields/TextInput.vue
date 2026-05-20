@@ -9,12 +9,17 @@
 			<br v-if="limitLabel">
 			{{ limitLabel ?? '' }}
 		</label>
-		<NcRichText
-			v-if="isOutput && hasValue"
-			class="rendered-output"
-			:text="value ?? ''"
-			:use-markdown="true"
-			:autolink="true" />
+		<div
+			v-if="isOutput && hasValue && !isEditing"
+			class="output-wrapper"
+			:title="t('assistant', 'Double-click to edit')"
+			@dblclick="enterEditMode">
+			<NcRichText
+				class="rendered-output"
+				:text="value ?? ''"
+				:use-markdown="true"
+				:autolink="true" />
+		</div>
 		<NcRichContenteditable
 			v-else
 			:id="id"
@@ -28,7 +33,8 @@
 			:placeholder="placeholder"
 			:title="title"
 			@submit="hasValue && $emit('submit', $event)"
-			@update:model-value="$emit('update:value', $event)" />
+			@update:model-value="$emit('update:value', $event)"
+			@blur="onEditableBlur" />
 		<NcButton v-if="isOutput && hasValue"
 			class="copy-button"
 			variant="secondary"
@@ -135,6 +141,7 @@ export default {
 	data() {
 		return {
 			copied: false,
+			isEditing: false,
 			maxLength: MAX_TEXT_INPUT_LENGTH,
 		}
 	},
@@ -203,6 +210,39 @@ export default {
 				showError(t('assistant', 'Result could not be copied to clipboard'))
 			}
 		},
+		enterEditMode() {
+			if (!this.isOutput) {
+				return
+			}
+			this.isEditing = true
+			this.$nextTick(() => {
+				const ref = this.$refs.input
+				if (!ref) {
+					return
+				}
+				if (typeof ref.focus === 'function') {
+					ref.focus()
+					return
+				}
+				const el = ref.$el
+				if (!el) {
+					return
+				}
+				if (typeof el.focus === 'function') {
+					el.focus()
+					return
+				}
+				const editable = el.querySelector?.('[contenteditable]')
+				if (editable && typeof editable.focus === 'function') {
+					editable.focus()
+				}
+			})
+		},
+		onEditableBlur() {
+			if (this.isOutput && this.isEditing) {
+				this.isEditing = false
+			}
+		},
 	},
 }
 </script>
@@ -224,6 +264,7 @@ body[dir="rtl"] .choose-file-button {
 	.copy-button,
 	.choose-file-button {
 		position: absolute !important;
+		z-index: 10;
 	}
 
 	.choose-file-button {
@@ -235,6 +276,18 @@ body[dir="rtl"] .choose-file-button {
 		right: 4px;
 	}
 
+	.output-wrapper {
+		display: block !important;
+		box-sizing: border-box !important;
+		border: 2px solid var(--color-primary-element) !important;
+		border-radius: var(--border-radius) !important;
+		padding: 8px !important;
+		padding-bottom: 42px !important;
+		max-height: 35vh !important;
+		overflow-y: auto !important;
+		cursor: text;
+	}
+
 	.rich-contenteditable__input {
 		min-height: calc(var(--default-clickable-area) + 4px);
 		padding-top: 5px !important;
@@ -243,6 +296,8 @@ body[dir="rtl"] .choose-file-button {
 	.shadowed .rich-contenteditable__input {
 		border: 2px solid var(--color-primary-element) !important;
 		padding-bottom: 38px !important;
+		max-height: 35vh !important;
+		overflow-y: auto !important;
 	}
 }
 </style>
