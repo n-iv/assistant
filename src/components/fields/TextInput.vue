@@ -9,17 +9,14 @@
 			<br v-if="limitLabel">
 			{{ limitLabel ?? '' }}
 		</label>
-		<div
+		<NcRichText
 			v-if="isOutput && hasValue && !isEditing"
-			class="output-wrapper"
+			class="rendered-output output-wrapper"
 			:title="t('assistant', 'Double-click to edit')"
-			@dblclick="enterEditMode">
-			<NcRichText
-				class="rendered-output"
-				:text="value ?? ''"
-				:use-markdown="true"
-				:autolink="true" />
-		</div>
+			:text="value ?? ''"
+			:use-markdown="true"
+			:autolink="true"
+			@dblclick="enterEditMode" />
 		<NcRichContenteditable
 			v-else
 			:id="id"
@@ -280,12 +277,14 @@ body[dir="rtl"] .choose-file-button {
 		display: block !important;
 		box-sizing: border-box !important;
 		border: 2px solid var(--color-primary-element) !important;
-		border-radius: var(--border-radius) !important;
+		border-radius: var(--border-radius-large) !important;
 		padding: 8px !important;
 		padding-bottom: 42px !important;
 		max-height: 35vh !important;
 		overflow-y: auto !important;
-		cursor: text;
+		.rendered-output, .rendered-output * {
+			cursor: text;
+		}
 	}
 
 	.rich-contenteditable__input {
@@ -297,7 +296,6 @@ body[dir="rtl"] .choose-file-button {
 		border: 2px solid var(--color-primary-element) !important;
 		padding-bottom: 38px !important;
 		max-height: 35vh !important;
-		overflow-y: auto !important;
 	}
 }
 </style>
